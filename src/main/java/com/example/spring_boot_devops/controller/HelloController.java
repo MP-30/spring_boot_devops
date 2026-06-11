@@ -26,3 +26,4 @@ public class HelloController {
 //class check faulty code with jenkins
 //now testing pipeline
 //retry
+//final check of pipeline with email also
