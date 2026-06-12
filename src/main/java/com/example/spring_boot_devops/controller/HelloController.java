@@ -27,3 +27,4 @@ public class HelloController {
 //now testing pipeline
 //retry
 //final check of pipeline with email also
+//testing failed email
