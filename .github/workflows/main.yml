@@ -58,7 +58,7 @@ jobs:
           subject: Testing my Jenkins
           to: learningonly092@gmail.com
           from: GitHub Actions CI
-          body: This is for my personal testing.. Hi Hi ha ha hu hu
+          body: This is for my personal testing.. Hi Hi ha ha hu hu.. from github actions
 
       # Post Action: Failure (Send Email Notification)
       - name: Send Failure Email
@@ -70,7 +70,7 @@ jobs:
           secure: true
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: 'ALARM: Jenkins Build Failed'
+          subject: 'ALARM: Github actions Build Failed'
           to: learningonly092@gmail.com
           from: GitHub Actions CI
-          body: Jenkins Pipeline Failed! Please check the terminal logs.
+          body: GITHUB actions failed! Please check the terminal logs.
