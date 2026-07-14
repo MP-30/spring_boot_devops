@@ -1,4 +1,4 @@
-name: CI Workflow
+name: Java CI/CD Pipeline
 
 on:
   push:
@@ -9,31 +9,68 @@ on:
       - main
 
 jobs:
-  build:
-    runs-on: ubuntu-24.04
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
     steps:
-      - name: Checkout code
+      # Stage: Checkout Code
+      - name: Checkout Code
         uses: actions/checkout@v4
 
-      - name: Build project
-        run: echo "Building dummy project..."
+      # Tool Configuration: Setup Java and Maven caching
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
 
-  test:
-    runs-on: ubuntu-24.04
-    needs: build
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # Stage: Build
+      - name: Build with Maven
+        run: mvn clean package
 
-      - name: Run tests
-        run: echo "testing dummy project..."
+      # Post Action: Success (Archive Artifacts)
+      - name: Archive Production Artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: spring-boot-jar
+          path: target/*.jar
+          if-no-files-found: error
 
-  deploy:
-    runs-on: ubuntu-24.04
-    needs: test
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      # Stage: Deploy (Runs in background)
+      - name: Deploy Application
+        run: |
+          nohup java -jar target/*.jar > app.log 2>&1 &
+          sleep 5 # Gives the background process a moment to initialize
+          cat app.log
 
-      - name: Deploy application
-        run: echo "Deploying dummy project..."
+      # Post Action: Success (Send Email Notification)
+      - name: Send Success Email
+        if: success()
+        uses: dawidd6/action-send-mail@v4
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: Testing my Jenkins
+          to: learningonly092@gmail.com
+          from: GitHub Actions CI
+          body: This is for my personal testing.. Hi Hi ha ha hu hu
+
+      # Post Action: Failure (Send Email Notification)
+      - name: Send Failure Email
+        if: failure()
+        uses: dawidd6/action-send-mail@v4
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: 'ALARM: Jenkins Build Failed'
+          to: learningonly092@gmail.com
+          from: GitHub Actions CI
+          body: Jenkins Pipeline Failed! Please check the terminal logs.
